@@ -1,0 +1,46 @@
+{
+	"overrides": [
+		{
+			"files": "*.pug",
+			"options": {
+				"parser": "pug",
+				"singleQuote": false,
+				"tabWidth": 4,
+				"useTabs": true
+			}
+		},
+		{
+			"files": ".scss",
+			"options": {
+				"parser": "scss",
+				"singleQuote": false,
+				"tabWidth": 4,
+				"useTabs": true
+			}
+		},
+		{
+			"files": [".js", ".ts"],
+			"options": {
+				"parser": "babel",
+				"singleQuote": false,
+				"tabWidth": 4,
+				"useTabs": true,
+				"semi": true
+			}
+		},
+		{
+			"files": ".json",
+			"options": {
+				"tabWidth": 4,
+				"useTabs": true
+			}
+		}
+	],
+	"printWidth": 95,
+	"semi": true,
+	"singleQuote": false,
+	"singleAttributePerline": true,
+	"tabWidth": 4,
+	"trailingComma": "none",
+	"useTabs": true
+}
