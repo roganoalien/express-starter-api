@@ -1,12 +1,13 @@
+import { PrismaClient } from "@prisma/client";
+
 export default interface ConfigObjecgt {
-	environtment: string;
-	port: number;
 	db: {
 		uri: string;
-		user: string;
-		password: string;
 	};
+	environtment: string;
 	jwt: {
 		secret: string;
 	};
+	port: number;
+	prisma: PrismaClient;
 }

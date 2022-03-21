@@ -3,7 +3,7 @@ import morgan from "morgan";
 import cors from "cors";
 import passport from "passport";
 import cron from "node-cron";
-import passportMiddleware from "./middlewares/passport";
+// import passportMiddleware from "./middlewares/passport";
 // CONFIG
 import { config } from "./config";
 import { cronController } from "./controllers/controller.cron";
@@ -26,12 +26,18 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(useragent.express());
 app.use(passport.initialize());
-passport.use(passportMiddleware);
+// passport.use(passportMiddleware);
 // ROUTES
-app.get("/index", (req: Request, res: Response) => {
+app.get("/", async (req: Request, res: Response) => {
+	const users = await config.prisma.user.findMany({
+		include: {
+			role: true
+		}
+	});
 	res.status(200).json({
 		status: 200,
-		message: "👺 ✌🏼 🥷🏼 App is running!"
+		message: "👺 ✌🏼 🥷🏼 App is running!",
+		users
 	});
 });
 // -- Open Routes
