@@ -21,20 +21,20 @@ datasource db {
 // @relation("UserToUser")
 // USER
 model User {
-    id                String   @id @default(cuid())
-    confirmed         Boolean  @default(false)
+    id                String     @id @default(cuid())
+    confirmed         Boolean    @default(false)
     confirmation_code Int?
-    email             String   @unique
-    expiration_code   DateTime
-    is_super_admin    Boolean  @default(false)
-    name              String?  @db.VarChar(255)
-    password          String   @db.VarChar(255) @ignore
-    role              Role?    @relation(fields: [roleId], references: [id])
-    roleId            String?
+    email             String     @unique
+    expiration_code   DateTime   @default(dbgenerated("NOW() + interval '1 hour'"))
+    is_super_admin    Boolean    @default(false)
+    name              String?    @db.VarChar(255)
+    password          String     @db.VarChar(255)
+    updated_at        DateTime   @updatedAt
+    created_at        DateTime   @default(now())
+    permission        Permission @default(EDITOR)
 }
 
-model Role {
-    id    String @id @default(cuid())
-    type  String @default("editor")
-    users User[]
+enum Permission {
+    EDITOR
+    ADMIN
 }

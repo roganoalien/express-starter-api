@@ -1,15 +1,15 @@
 import express, { Request, Response } from "express";
 import morgan from "morgan";
 import cors from "cors";
-import passport from "passport";
 import cron from "node-cron";
-// import passportMiddleware from "./middlewares/passport";
+import passport from "passport";
+import passportMiddleware from "./middlewares/passport";
 // CONFIG
 import { config } from "./config";
 import { cronController } from "./controllers/controller.cron";
 // ROUTES
 // import GetUrl from "./api/api.url";
-// import Auth from "./api/api.auth";
+import Auth from "./api/api.auth";
 // USER DATA
 import useragent from "express-useragent";
 import { errorHandler, notFound } from "./middlewares/handlers";
@@ -26,22 +26,25 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(useragent.express());
 app.use(passport.initialize());
-// passport.use(passportMiddleware);
+passport.use(passportMiddleware);
 // ROUTES
 app.get("/", async (req: Request, res: Response) => {
+	// ---- Validates if a superAdmin has been created
 	const users = await config.prisma.user.findMany({
-		include: {
-			role: true
+		where: {
+			is_super_admin: true
 		}
 	});
 	res.status(200).json({
 		status: 200,
 		message: "👺 ✌🏼 🥷🏼 App is running!",
-		users
+		super_admin: {
+			can_create: users.length > 0 ? false : true
+		}
 	});
 });
 // -- Open Routes
-// app.use("/", GetUrl);
+app.use("/auth", Auth);
 // -- Auth Routes
 // app.use("/auth", Auth);
 // -- Api Routes
