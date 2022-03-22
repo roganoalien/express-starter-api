@@ -1,6 +1,7 @@
 import { User } from "@prisma/client";
 import { Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import { config } from "../../config";
 
 /**
@@ -55,18 +56,57 @@ export const superAdmin = async (req: Request, res: Response): Promise<Response>
  * Validates if you can create superAdmin
  */
 export const createSuperAdmin = async (req: Request, res: Response): Promise<Response> => {
-	const { email, password } = req.body;
-	const users = await config.prisma.user.create({
+	const { email, password, name } = req.body;
+	const salt = await bcrypt.genSalt(10);
+	const hashedPassword = await bcrypt.hash(password, salt);
+	const user = await config.prisma.user.create({
 		data: {
 			confirmed: true,
 			email,
-			password,
+			name: name ? name : null,
+			password: hashedPassword,
 			permission: "ADMIN",
 			is_super_admin: true
 		}
 	});
 	return res.status(200).json({
 		status: 200,
-		message: "Creado"
+		message: "Creado",
+		user: {
+			id: user.id,
+			name: user.name,
+			email: user.email
+		}
+	});
+};
+
+/**
+ * Logins user
+ */
+export const loginUser = async (req: Request, res: Response): Promise<Response> => {
+	const { email, password } = req.body;
+	if (!email || !password) {
+		return res.status(400).json({
+			message: "Email and password are required!"
+		});
+	}
+	const user: any = await config.prisma.user.findUnique({ where: { email } });
+	if (!user) {
+		return res.status(400).json({
+			status: 400,
+			message: "Email or password incorrect! 🛑 🙉 🤦🏼‍♂️ "
+		});
+	}
+	const matched = await bcrypt.compare(password, user?.password);
+	if (user && matched) {
+		return res.status(200).json({
+			status: 200,
+			message: "Inicio de sesión 📱",
+			token: createToken(user, false)
+		});
+	}
+	return res.status(400).json({
+		status: 400,
+		message: "Email or password incorrect! 🛑 🙉 🤦🏼‍♂️ "
 	});
 };
