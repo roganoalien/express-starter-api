@@ -63,18 +63,17 @@ export const superAdmin = async (req: Request, res: Response): Promise<Response>
 
 	if (user.length < 1) {
 		return res.status(200).json({
-			status: 200,
-			super_admin: {
-				can_create: true,
-				message: "You can create superAdmin! 👺 🥷🏼"
-			}
+			can_create: true,
+			message: "You can create superAdmin! 👺 🥷🏼",
+			status: 200
 		});
 	} else {
 		const error = new Error("🙉 🙈 🙊 - 🚨 Forbidden!");
 		return res.status(403).json({
+			can_create: false,
+			message: error.message,
 			status: 403,
-			type: error.name,
-			message: error.message
+			type: error.name
 		});
 	}
 };
@@ -84,13 +83,15 @@ export const superAdmin = async (req: Request, res: Response): Promise<Response>
  */
 export const createSuperAdmin = async (req: Request, res: Response): Promise<Response> => {
 	const { email, password, name } = req.body;
+	console.log("SUPER ADMIN BACK");
+	console.table(req.body);
 	const passwordReady = await passwordTreatment(password);
 	const user = await config.prisma.user.create({
 		data: {
 			confirmed: true,
 			email,
 			expiration_code: add(new Date(), { hours: 1 }),
-			name: name ? name : null,
+			name: name !== null || name !== "" ? name : null,
 			password: passwordReady,
 			permission: "ADMIN",
 			is_super_admin: true
