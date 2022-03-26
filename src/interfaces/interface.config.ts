@@ -10,4 +10,10 @@ export default interface ConfigObjecgt {
 	};
 	port: number;
 	prisma: PrismaClient;
+	sendgrid: {
+		api: string;
+		email: string;
+		using: boolean;
+	};
+	url: string;
 }

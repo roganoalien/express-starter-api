@@ -1,14 +1,16 @@
-import { User } from "@prisma/client";
 import { Request, Response } from "express";
+import { User } from "@prisma/client";
+import sgMail from "@sendgrid/mail";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { config } from "../../config";
 import { add, compareAsc } from "date-fns";
+import { config } from "../../config";
 
+sgMail.setApiKey(config.sendgrid.api);
 /**
  * Create random 6 digits number
  * @constructor
- * @returns int
+ * @returns {number}
  */
 function createCode(): number {
 	const min = 100000;
@@ -38,6 +40,18 @@ function validateToken(token: string) {
 }
 
 /**
+ * Hashes and salts password
+ * @constructor
+ * @param {string} password - the user passwords to get hashed
+ * @returns {string}
+ */
+const passwordTreatment = async (password: string): Promise<string> => {
+	const salt = await bcrypt.genSalt(10);
+	const hashedPassword = await bcrypt.hash(password, salt);
+	return hashedPassword;
+};
+
+/**
  * Validates if you can create superAdmin
  */
 export const superAdmin = async (req: Request, res: Response): Promise<Response> => {
@@ -64,20 +78,20 @@ export const superAdmin = async (req: Request, res: Response): Promise<Response>
 		});
 	}
 };
+
 /**
- * Validates if you can create superAdmin
+ * Creates Super Admin User
  */
 export const createSuperAdmin = async (req: Request, res: Response): Promise<Response> => {
 	const { email, password, name } = req.body;
-	const salt = await bcrypt.genSalt(10);
-	const hashedPassword = await bcrypt.hash(password, salt);
+	const passwordReady = await passwordTreatment(password);
 	const user = await config.prisma.user.create({
 		data: {
 			confirmed: true,
 			email,
 			expiration_code: add(new Date(), { hours: 1 }),
 			name: name ? name : null,
-			password: hashedPassword,
+			password: passwordReady,
 			permission: "ADMIN",
 			is_super_admin: true
 		}
@@ -114,6 +128,31 @@ export const registerUser = async (req: Request, res: Response): Promise<Respons
 				confirmation_code
 			}
 		});
+		const cCodeArray = Array.from(String(confirmation_code), Number);
+		const eData: any = await sgMail
+			.send({
+				to: user.email,
+				from: config.sendgrid.email,
+				templateId: "d-f60a61262aa6445b827803c9f27359f2",
+				dynamicTemplateData: {
+					subject: `Welcome${name ? ` ${name}` : ""}!`,
+					confirm_url: `${config.url}/confirm/${user.id}`,
+					code_one: cCodeArray[0],
+					code_two: cCodeArray[1],
+					code_three: cCodeArray[2],
+					code_four: cCodeArray[3],
+					code_five: cCodeArray[4],
+					code_six: cCodeArray[5]
+				}
+			})
+			.then((resData) => resData)
+			.catch((err) => {
+				const error = new Error(`🙉 🙈 🙊 - 🚨 ${err}`);
+				return res.status(500).json({
+					status: 500,
+					error
+				});
+			});
 		return res.status(200).json({
 			status: 200,
 			message: `User Created! ${permission === "ADMIN" ? "👨🏼‍💼 👱‍♂️" : "👱‍♂️"}`,
@@ -121,8 +160,21 @@ export const registerUser = async (req: Request, res: Response): Promise<Respons
 			user: {
 				email: user.email,
 				id: user.id
-			}
+			},
+			email:
+				eData[0].statusCode === 202
+					? "Sent! 🛫 🥷🏼 ✌🏼"
+					: "There was an error! 🙈 🙊 🙉 🚨"
 		});
+		// return res.status(200).json({
+		// 	status: 200,
+		// 	message: `User Created! ${permission === "ADMIN" ? "👨🏼‍💼 👱‍♂️" : "👱‍♂️"}`,
+		// 	confirmation_code,
+		// 	user: {
+		// 		email: user.email,
+		// 		id: user.id
+		// 	}
+		// });
 	}
 	return res.status(409).json({
 		status: 409,
