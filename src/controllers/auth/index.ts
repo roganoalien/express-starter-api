@@ -83,10 +83,8 @@ export const superAdmin = async (req: Request, res: Response): Promise<Response>
  */
 export const createSuperAdmin = async (req: Request, res: Response): Promise<Response> => {
 	const { email, password, name } = req.body;
-	console.log("SUPER ADMIN BACK");
-	console.table(req.body);
 	const passwordReady = await passwordTreatment(password);
-	const user = await config.prisma.user.create({
+	await config.prisma.user.create({
 		data: {
 			confirmed: true,
 			email,
@@ -99,12 +97,12 @@ export const createSuperAdmin = async (req: Request, res: Response): Promise<Res
 	});
 	return res.status(200).json({
 		status: 200,
-		message: "Super Admin Created! 👺 🥷🏼 👨🏼‍💼",
-		user: {
-			id: user.id,
-			name: user.name,
-			email: user.email
-		}
+		message: "Super Admin Created! 👺 🥷🏼 👨🏼‍💼"
+		// user: {
+		// 	id: user.id,
+		// 	name: user.name,
+		// 	email: user.email
+		// }
 	});
 };
 
@@ -190,6 +188,7 @@ export const loginUser = async (req: Request, res: Response): Promise<Response> 
 	const { email, password } = req.body;
 	if (!email || !password) {
 		return res.status(400).json({
+			status: 400,
 			message: "Email and password are required!"
 		});
 	}
