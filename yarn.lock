@@ -1100,6 +1100,11 @@ fast-levenshtein@^2.0.6:
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
 
+feature-policy@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/feature-policy/-/feature-policy-0.6.0.tgz#4d1ee7e8fa615e023d1cdb884a1777a99220febf"
+  integrity sha512-l7+bg0ThDVR9s7JIg0NfUZvbSMRCQL4iPyPXVH6uUwCHh8tQ6kVgVybOTvkcMAzQeXevHnSrNlaXUK8m770HsA==
+
 file-entry-cache@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/file-entry-cache/-/file-entry-cache-6.0.1.tgz#211b2dd9659cb0394b073e7323ac3c933d522027"
