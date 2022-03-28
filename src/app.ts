@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, RequestHandler, Response } from "express";
 import morgan from "morgan";
 import cors from "cors";
 import helmet from "helmet";
@@ -66,7 +66,15 @@ app.use(
 		}
 	})
 );
-app.use(cors());
+const whitelist = ["http://localhost:3000", "http://localhost:4000"];
+app.use(
+	cors({
+		origin: whitelist,
+		methods: "GET,PUT,POST,DELETE",
+		preflightContinue: false,
+		optionsSuccessStatus: 206
+	})
+);
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(useragent.express());
